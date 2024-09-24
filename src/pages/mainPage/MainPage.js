@@ -21,7 +21,7 @@ const MainPage = () => {
           <header className="flex flex-col sm:flex-row justify-between items-center mb-8 sm:mb-16 space-y-4 sm:space-y-0">
             <div className="flex items-center justify-center sm:justify-start w-full sm:w-auto">
               <img 
-                src={darkMode ? "logo-dark.png" : "logo-light.png"} 
+                src={darkMode ? "images/logo-dark.png" : "images/logo-light.png"} 
                 alt="CareerSupport Logo" 
                 className="h-16 sm:h-20 w-auto"
               />
