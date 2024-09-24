@@ -60,9 +60,12 @@ const MainPage = () => {
               <PlusCircle className="w-20 h-20 text-blue-500 dark:text-blue-400 mb-6" />
               <h3 className="text-2xl font-semibold text-blue-800 dark:text-blue-300 mb-4">새 AI 면접 템플릿 생성</h3>
               <p className="text-lg text-gray-600 dark:text-gray-400 text-center mb-6">맞춤형 면접 템플릿을 만들어 연습을 시작하세요.</p>
-              <button className="bg-blue-500 text-white px-8 py-3 text-lg rounded-full hover:bg-blue-600 transition duration-300 ease-in-out">
-                템플릿 생성하기
-              </button>
+              <Link to = "interview/template">
+                <button className="bg-blue-500 text-white px-8 py-3 text-lg rounded-full hover:bg-blue-600 transition duration-300 ease-in-out">
+                  템플릿 생성하기
+                </button>
+              </Link>
+              
             </div>
 
             <div className="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 rounded-lg shadow-md p-8 flex flex-col items-center justify-center transition duration-300 ease-in-out hover:shadow-lg">
