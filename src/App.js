@@ -3,6 +3,7 @@ import MainPage from "./pages/MainPage";
 import "tailwindcss/tailwind.css";
 import LoginPage from "./pages/LoginPage";
 import { ThemeProvider } from './utils/ThemeProvider';
+import SignUpPage from "./pages/SignUpPage";
 function App() {
   return (
     <ThemeProvider>
@@ -10,6 +11,7 @@ function App() {
         <Route>
           <Route path="/" element={<MainPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
         </Route>
       </Routes>
     </ThemeProvider>
