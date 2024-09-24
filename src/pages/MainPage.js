@@ -72,9 +72,11 @@ const MainPage = () => {
               <List className="w-20 h-20 text-blue-500 dark:text-blue-400 mb-6" />
               <h3 className="text-2xl font-semibold text-blue-800 dark:text-blue-300 mb-4">이전 면접 템플릿 보기</h3>
               <p className="text-lg text-gray-600 dark:text-gray-400 text-center mb-6">이전에 생성한 템플릿을 확인하고 복습하세요.</p>
-              <button className="bg-blue-500 text-white px-8 py-3 text-lg rounded-full hover:bg-blue-600 transition duration-300 ease-in-out">
-                템플릿 목록 보기
-              </button>
+              <Link to = "interview/list">
+                <button className="bg-blue-500 text-white px-8 py-3 text-lg rounded-full hover:bg-blue-600 transition duration-300 ease-in-out">
+                  템플릿 목록 보기
+                </button>
+              </Link>
             </div>
           </div>
         </main>

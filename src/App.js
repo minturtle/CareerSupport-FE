@@ -6,6 +6,7 @@ import { ThemeProvider } from './utils/ThemeProvider';
 import SignUpPage from "./pages/SignUpPage";
 import InterviewTemplatePage from "./pages/InterviewTemplate";
 import InterviewChatPage from "./pages/Interview";
+import InterviewTemplateListPage from "./pages/TemplateList";
 function App() {
   return (
     <ThemeProvider>
@@ -16,6 +17,7 @@ function App() {
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/interview/template" element={<InterviewTemplatePage />} />
           <Route path="/interview/chat" element={<InterviewChatPage />} />
+          <Route path="/interview/list" element={<InterviewTemplateListPage />} />
 
         </Route>
       </Routes>
