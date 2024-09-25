@@ -42,9 +42,11 @@ jobs:
     needs: build
 
     steps:
-      # 1. Checkout the repository again
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # 1. Download the build artifacts
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
 
       # 2. Set up SSH
       - name: Set up SSH
@@ -52,16 +54,14 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
 
-      # 3. Remove existing files and deploy to Google Compute Engine
+      # 3. Deploy to Google Compute Engine using scp
       - name: Deploy to Google Compute Engine
         env:
           GCE_USER: ${{ secrets.GCE_USER }}
           GCE_HOST: ${{ secrets.GCE_HOST }}
         run: |
-          # Remove existing files on the GCE instance
-          ssh -o StrictHostKeyChecking=no $GCE_USER@$GCE_HOST << 'EOF'
-            sudo rm -rf /home/ubuntu/static/*
-          EOF
+          # Remove existing files from the static directory
+          ssh -o StrictHostKeyChecking=no $GCE_USER@$GCE_HOST "sudo rm -rf /home/ubuntu/static/*"
 
-          # Copy new build files to the GCE instance
+          # Copy the build files to the static directory using scp
           scp -o StrictHostKeyChecking=no -r build/* $GCE_USER@$GCE_HOST:/home/ubuntu/static/
