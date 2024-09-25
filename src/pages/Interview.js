@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, User, Bot, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import InterviewApiService from "../services/InterviewService"
-
+import UnAuthorizedError from "../errors/UnAuthorizedErrors";
 
 const InterviewChatPage = () => {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -17,9 +17,10 @@ const InterviewChatPage = () => {
   const [templateId, setTemplateId] = useState(null);
   const [interviewTheme, setInterviewTheme] = useState("React");
   const location = useLocation();
+  const navigate = useNavigate();
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView();
   };
 
   useEffect(scrollToBottom, [messages]);
@@ -62,8 +63,12 @@ const InterviewChatPage = () => {
       if (response.data.length === 0 && response.cursor === null) {
         await startInterview();
       }
-    } catch (error) {
-      console.error('Error loading messages:', error);
+    } catch (err) {
+      if (err instanceof UnAuthorizedError) {
+        alert('로그인이 만료되었습니다. 로그인 페이지로 이동합니다.');
+        navigate("/login");
+      }
+
       alert('메시지를 불러오는 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
@@ -84,8 +89,11 @@ const InterviewChatPage = () => {
           resolve
         );
       });
-    } catch (error) {
-      console.error('Error in startInterview:', error);
+    } catch (err) {
+      if (err instanceof UnAuthorizedError) {
+        alert('로그인이 만료되었습니다. 로그인 페이지로 이동합니다.');
+        navigate("/login");
+      }
       alert('인터뷰 시작 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
@@ -140,8 +148,13 @@ const InterviewChatPage = () => {
           }
         );
       } catch (error) {
-        console.error('Error in handleSend:', error);
-        alert('답변 전송 중 오류가 발생했습니다.');
+        if (error instanceof UnAuthorizedError) {
+          alert('로그인이 만료되었습니다. 로그인 페이지로 이동합니다.');
+          navigate("/login");
+        }
+        else {
+          alert('답변 전송 중 오류가 발생했습니다.');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -151,7 +164,7 @@ const InterviewChatPage = () => {
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow py-4 px-4">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">{interviewTheme} 을/를 주제로 모의면접이 진행중입니다.</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">{interviewTheme}을/를 주제로 모의면접이 진행중입니다.</h1>
           <button
             onClick={toggleDarkMode}
             className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"

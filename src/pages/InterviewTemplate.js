@@ -4,6 +4,9 @@ import { useTheme } from '../utils/ThemeProvider';
 import { useNavigate } from 'react-router-dom';
 import InterviewApiService from '../services/InterviewService';
 
+import UnAuthorizedError from "../errors/UnAuthorizedErrors";
+
+
 const InterviewTemplatePage = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const [theme, setTheme] = useState('');
@@ -18,7 +21,12 @@ const InterviewTemplatePage = () => {
       const result = await InterviewApiService.createTemplate(theme);
 
       navigate('/interview/chat', { state: { templateId: result.interviewId, theme: result.theme } });
-    } catch (error) {
+    } catch (err) {
+      if (err instanceof UnAuthorizedError) {
+        alert('로그인이 만료되었습니다. 로그인 페이지로 이동합니다.');
+        navigate("/login");
+      }
+
     } finally {
       setIsLoading(false);
     }

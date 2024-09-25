@@ -1,4 +1,5 @@
 import axios from 'axios';
+import UnAuthorizedError from "../errors/UnAuthorizedErrors";
 
 const API_BASE_URL = 'https://careersupport.serveblog.net/api/interview';
 
@@ -64,6 +65,10 @@ const InterviewApiService = {
                 body: JSON.stringify({ answer }),
             });
 
+            if (response.status === 401) {
+                throw new UnAuthorizedError();
+            }
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -93,6 +98,10 @@ const InterviewApiService = {
                 },
             });
 
+
+            if (response.status === 401) {
+                throw new UnAuthorizedError();
+            }
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -135,6 +144,17 @@ const InterviewApiService = {
             throw error;
         }
     },
+
 };
+
+axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            throw new UnAuthorizedError();
+        }
+        return Promise.reject(error);
+    }
+);
 
 export default InterviewApiService;

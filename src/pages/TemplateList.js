@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Calendar, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
 import InterviewApiService from '../services/InterviewService';
 import { useNavigate } from 'react-router-dom';
-
+import UnAuthorizedError from "../errors/UnAuthorizedErrors";
 
 
 const InterviewTemplateListPage = () => {
@@ -11,7 +11,6 @@ const InterviewTemplateListPage = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const templatesPerPage = 10;
 
@@ -21,12 +20,14 @@ const InterviewTemplateListPage = () => {
 
   const fetchTemplates = async () => {
     setIsLoading(true);
-    setError(null);
     try {
       const data = await InterviewApiService.getTemplates(currentPage, templatesPerPage);
       setTemplates(data);
     } catch (err) {
-      setError('템플릿을 불러오는데 실패했습니다.');
+      if (err instanceof UnAuthorizedError) {
+        alert('로그인이 만료되었습니다. 로그인 페이지로 이동합니다.');
+        navigate("/login");
+      }
       console.error('Failed to fetch templates:', err);
     } finally {
       setIsLoading(false);
@@ -60,9 +61,8 @@ const InterviewTemplateListPage = () => {
         </div>
 
         {isLoading && <p className="text-center">로딩 중...</p>}
-        {error && <p className="text-center text-red-500">{error}</p>}
 
-        {!isLoading && !error && (
+        {!isLoading && (
           <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
               {templates.map((template) => (
