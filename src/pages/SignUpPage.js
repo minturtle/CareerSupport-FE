@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
 import { useNavigate } from 'react-router-dom';
+import { PulseLoader } from "react-spinners";
+
 import UserApiService from '../services/UserAPIService';
 
 const SignUpPage = () => {
   const [username, setUsername] = useState('');
   const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { darkMode, toggleDarkMode } = useTheme();
   const navigate = useNavigate();
@@ -15,7 +18,7 @@ const SignUpPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     try {
       await UserApiService.register({ username, nickname, password });
       alert('회원가입이 성공적으로 완료되었습니다. 로그인 페이지로 이동합니다.');
@@ -27,6 +30,8 @@ const SignUpPage = () => {
       } else {
         alert('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,7 +56,13 @@ const SignUpPage = () => {
             회원가입
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        {loading ? <div className='text-center'>
+          <PulseLoader
+            color="#FFFFFF"
+            size={10}
+          />
+
+        </div> : <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="username" className="sr-only">사용자 이름</label>
@@ -109,7 +120,7 @@ const SignUpPage = () => {
               회원가입
             </button>
           </div>
-        </form>
+        </form>}
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           이미 계정이 있으신가요?{' '}
           <a href="#" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">

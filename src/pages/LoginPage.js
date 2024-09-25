@@ -2,18 +2,22 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
 import { Link, useNavigate } from 'react-router-dom';
+import { PulseLoader } from "react-spinners";
+
 import UserApiService from '../services/UserAPIService';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { darkMode, toggleDarkMode } = useTheme();
   const navigate = useNavigate();
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await UserApiService.login({ username, password });
@@ -30,6 +34,8 @@ const LoginPage = () => {
     } catch (error) {
       console.error('Login error:', error);
       alert('로그인에 실패했습니다. 사용자 이름과 비밀번호를 확인해주세요.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,7 +60,13 @@ const LoginPage = () => {
             로그인
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        {loading ? <div className='text-center'>
+          <PulseLoader
+            color="#FFFFFF"
+            size={10}
+          />
+
+        </div> : <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="username" className="sr-only">사용자 이름</label>
@@ -101,7 +113,8 @@ const LoginPage = () => {
               로그인
             </button>
           </div>
-        </form>
+        </form>}
+
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           계정이 없으신가요?{' '}
           <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">

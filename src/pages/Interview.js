@@ -4,6 +4,7 @@ import { useTheme } from '../utils/ThemeProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
 import InterviewApiService from "../services/InterviewService"
 import UnAuthorizedError from "../errors/UnAuthorizedErrors";
+import UserApiService from '../services/UserAPIService';
 
 const InterviewChatPage = () => {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -66,6 +67,7 @@ const InterviewChatPage = () => {
     } catch (err) {
       if (err instanceof UnAuthorizedError) {
         alert('로그인이 만료되었습니다. 로그인 페이지로 이동합니다.');
+        UserApiService.logout()
         navigate("/login");
       }
 
@@ -92,6 +94,7 @@ const InterviewChatPage = () => {
     } catch (err) {
       if (err instanceof UnAuthorizedError) {
         alert('로그인이 만료되었습니다. 로그인 페이지로 이동합니다.');
+        UserApiService.logout()
         navigate("/login");
       }
       alert('인터뷰 시작 중 오류가 발생했습니다.');
@@ -150,6 +153,7 @@ const InterviewChatPage = () => {
       } catch (error) {
         if (error instanceof UnAuthorizedError) {
           alert('로그인이 만료되었습니다. 로그인 페이지로 이동합니다.');
+          UserApiService.logout()
           navigate("/login");
         }
         else {

@@ -3,7 +3,7 @@ import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
 import { useNavigate } from 'react-router-dom';
 import InterviewApiService from '../services/InterviewService';
-
+import UserApiService from '../services/UserAPIService';
 import UnAuthorizedError from "../errors/UnAuthorizedErrors";
 
 
@@ -24,6 +24,7 @@ const InterviewTemplatePage = () => {
     } catch (err) {
       if (err instanceof UnAuthorizedError) {
         alert('로그인이 만료되었습니다. 로그인 페이지로 이동합니다.');
+        UserApiService.logout()
         navigate("/login");
       }
 

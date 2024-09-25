@@ -4,7 +4,7 @@ import { useTheme } from '../utils/ThemeProvider';
 import InterviewApiService from '../services/InterviewService';
 import { useNavigate } from 'react-router-dom';
 import UnAuthorizedError from "../errors/UnAuthorizedErrors";
-
+import UserApiService from '../services/UserAPIService';
 
 const InterviewTemplateListPage = () => {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -26,6 +26,7 @@ const InterviewTemplateListPage = () => {
     } catch (err) {
       if (err instanceof UnAuthorizedError) {
         alert('로그인이 만료되었습니다. 로그인 페이지로 이동합니다.');
+        UserApiService.logout()
         navigate("/login");
       }
       console.error('Failed to fetch templates:', err);
