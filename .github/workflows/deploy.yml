@@ -60,7 +60,6 @@ jobs:
           GCE_USER: ${{ secrets.GCE_USER }}
           GCE_HOST: ${{ secrets.GCE_HOST }}
         run: |
-          # Remove existing files from the static directory
           ssh -o StrictHostKeyChecking=no $GCE_USER@$GCE_HOST "sudo rm -rf /home/ubuntu/static/*"
       -name : Deploy to Google Compute Engine
         uses: appleboy/scp-action@master
