@@ -2,7 +2,7 @@
 import axios from 'axios';
 import UnAuthorizedError from "../errors/UnAuthorizedErrors";
 
-const API_BASE_URL = '/api/interview';
+const API_BASE_URL = window.location.origin + '/api/interview';
 
 const InterviewApiService = {
     getAuthorizationHeader() {
