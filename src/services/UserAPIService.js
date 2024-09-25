@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://careersupport.serveblog.net/api/users';
+const API_BASE_URL = '/api/users';
 
 
 const UserApiService = {

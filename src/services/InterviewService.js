@@ -1,7 +1,7 @@
 import axios from 'axios';
 import UnAuthorizedError from "../errors/UnAuthorizedErrors";
 
-const API_BASE_URL = 'https://careersupport.serveblog.net/api/interview';
+const API_BASE_URL = '/api/interview';
 
 const InterviewApiService = {
     getAuthorizationHeader() {
