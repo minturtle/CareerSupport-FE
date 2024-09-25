@@ -18,6 +18,36 @@ const InterviewChatPage = () => {
   const [interviewTheme, setInterviewTheme] = useState("React");
   const location = useLocation();
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToBottom, [messages]);
+
+  const executeAIMessage = (data) => {
+    setMessages(prev => {
+      const lastInterviewerIndex = prev.findLastIndex(msg => msg.sender === 'INTERVIEWER');
+
+      // 배열 데이터 처리: 쉼표 제거 및 공백 정리
+      const cleanedData = data.join('')
+
+      if (lastInterviewerIndex === -1) {
+        // INTERVIEWER 메시지가 없는 경우, 새 메시지 추가
+        return [...prev, { sender: 'INTERVIEWER', content: cleanedData }];
+      } else {
+        // 마지막 INTERVIEWER 메시지에 새 데이터 추가
+        const updatedMessages = [...prev];
+        const lastContent = updatedMessages[lastInterviewerIndex].content;
+
+        updatedMessages[lastInterviewerIndex] = {
+          ...updatedMessages[lastInterviewerIndex],
+          content: `${lastContent}${cleanedData}`
+        };
+        return updatedMessages;
+      }
+    });
+  }
+
   const loadMessages = useCallback(async () => {
     if (!hasMore || isLoading) return;
 
@@ -46,9 +76,7 @@ const InterviewChatPage = () => {
       await new Promise((resolve, reject) => {
         InterviewApiService.startInterview(
           templateId,
-          (data) => {
-            setMessages(prev => [...prev, { type: 'ai', content: data }]);
-          },
+          executeAIMessage,
           (error) => {
             console.error('Error starting interview:', error);
             reject(error);
@@ -94,30 +122,21 @@ const InterviewChatPage = () => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
       setIsLoading(true);
-      const userMessage = { type: 'user', content: input };
+      const userMessage = { sender: 'USER', content: input };
       setMessages(prev => [...prev, userMessage]);
       setInput('');
 
-      let aiMessage = { type: 'ai', content: '' };
+      let aiMessage = { sender: 'INTERVIEWER', content: '' };
       setMessages(prev => [...prev, aiMessage]);
 
-      const updateAiMessage = (content) => {
-        setMessages(prev => prev.map((msg, index) =>
-          index === prev.length - 1 ? { ...msg, content: msg.content + content } : msg
-        ));
-      };
 
       try {
         await InterviewApiService.sendAnswer(
           templateId,
           input,
-          (data) => updateAiMessage(data),
+          executeAIMessage,
           (error) => {
-            console.error('Error in sendAnswer:', error);
             alert('답변 전송 중 오류가 발생했습니다.');
-          },
-          () => {
-            console.log('Answer sending completed');
           }
         );
       } catch (error) {
@@ -150,12 +169,12 @@ const InterviewChatPage = () => {
         <div className="max-w-4xl mx-auto space-y-4">
           {isLoading && cursor && <div className="text-center">메시지를 불러오는 중...</div>}
           {messages.map((message, index) => (
-            <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`flex items-start space-x-2 max-w-[70%] ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                <div className={`p-2 rounded-full ${message.type === 'user' ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                  {message.type === 'user' ? <User size={24} className="text-white" /> : <Bot size={24} className="text-gray-700 dark:text-gray-300" />}
+            <div key={index} className={`flex ${message.sender === 'USER' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`flex items-start space-x-2 max-w-[70%] ${message.sender === 'USER' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                <div className={`p-2 rounded-full ${message.sender === 'USER' ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
+                  {message.sender === 'USER' ? <User size={24} className="text-white" /> : <Bot size={24} className="text-gray-700 dark:text-gray-300" />}
                 </div>
-                <div className={`p-3 rounded-lg ${message.type === 'user' ? 'bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-white'}`}>
+                <div className={`p-3 rounded-lg ${message.sender === 'USER' ? 'bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-white'}`}>
                   {message.content}
                 </div>
               </div>

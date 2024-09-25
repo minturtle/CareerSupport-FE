@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api/interview';
+const API_BASE_URL = 'https://careersupport.serveblog.net/api/interview';
 
 const InterviewApiService = {
     getAuthorizationHeader() {
@@ -12,7 +12,7 @@ const InterviewApiService = {
         try {
             const response = await axios.post(
                 `${API_BASE_URL}/new?theme=${encodeURIComponent(theme)}`,
-                {},  // POST 요청의 body (필요한 경우 여기에 데이터를 추가할 수 있습니다)
+                {},
                 {
                     headers: {
                         'Authorization': this.getAuthorizationHeader(),
@@ -53,7 +53,7 @@ const InterviewApiService = {
         }
     },
 
-    async sendAnswer(templateId, answer, onMessage, onError, onComplete) {
+    async sendAnswer(templateId, answer, onMessage, onError) {
         try {
             const response = await fetch(`${API_BASE_URL}/answer/${templateId}`, {
                 method: 'POST',
@@ -74,12 +74,11 @@ const InterviewApiService = {
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                const chunk = decoder.decode(value, { stream: true });
-                console.log(chunk);
+                const chunk = decoder.decode(value, { stream: true })
+                    .split('data:').map(part => part.replace(/\n/g, ''))
+                    .filter(part => part !== '');
                 onMessage(chunk);
             }
-
-            onComplete();
         } catch (error) {
             onError(error);
         }
@@ -104,7 +103,9 @@ const InterviewApiService = {
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                const chunk = decoder.decode(value, { stream: true });
+                const chunk = decoder.decode(value, { stream: true })
+                    .split('data:').map(part => part.replace(/\n/g, ''))
+                    .filter(part => part !== '');
                 onMessage(chunk);
             }
 
