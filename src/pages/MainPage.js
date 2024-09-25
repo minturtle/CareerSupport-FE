@@ -11,6 +11,7 @@ const MainPage = () => {
   const [userInfo, setUserInfo] = useState({ nickname: "익명의 개발자" });
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
   useEffect(() => {
     const checkLoginStatus = async () => {
       const token = localStorage.getItem('accessToken');
@@ -40,8 +41,19 @@ const MainPage = () => {
       setIsLoggedIn(false);
       setUserInfo({ nickname: "익명의 개발자" });
       localStorage.removeItem('accessToken');
-      navigate('/');
+
     } catch (error) {
+    } finally {
+      navigate('/');
+    }
+  };
+
+  const handleRedirectNeedsLogin = (link) => {
+    console.log(link)
+    if (isLoggedIn) {
+      navigate(link);
+    } else {
+      navigate('/login');
     }
   };
 
@@ -98,11 +110,12 @@ const MainPage = () => {
               <PlusCircle className="w-20 h-20 text-blue-500 dark:text-blue-400 mb-6" />
               <h3 className="text-2xl font-semibold text-blue-800 dark:text-blue-300 mb-4">새 AI 면접 템플릿 생성</h3>
               <p className="text-lg text-gray-600 dark:text-gray-400 text-center mb-6">맞춤형 면접 템플릿을 만들어 연습을 시작하세요.</p>
-              <Link to="interview/template">
-                <button className="bg-blue-500 text-white px-8 py-3 text-lg rounded-full hover:bg-blue-600 transition duration-300 ease-in-out">
-                  템플릿 생성하기
-                </button>
-              </Link>
+              <button
+                onClick={() => handleRedirectNeedsLogin("/interview/template")}
+                className="bg-blue-500 text-white px-8 py-3 text-lg rounded-full hover:bg-blue-600 transition duration-300 ease-in-out"
+              >
+                템플릿 생성하기
+              </button>
 
             </div>
 
@@ -110,16 +123,18 @@ const MainPage = () => {
               <List className="w-20 h-20 text-blue-500 dark:text-blue-400 mb-6" />
               <h3 className="text-2xl font-semibold text-blue-800 dark:text-blue-300 mb-4">이전 면접 템플릿 보기</h3>
               <p className="text-lg text-gray-600 dark:text-gray-400 text-center mb-6">이전에 생성한 템플릿을 확인하고 복습하세요.</p>
-              <Link to="interview/list">
-                <button className="bg-blue-500 text-white px-8 py-3 text-lg rounded-full hover:bg-blue-600 transition duration-300 ease-in-out">
-                  템플릿 목록 보기
-                </button>
-              </Link>
+
+              <button
+                onClick={() => handleRedirectNeedsLogin("/interview/list")}
+                className="bg-blue-500 text-white px-8 py-3 text-lg rounded-full hover:bg-blue-600 transition duration-300 ease-in-out">
+                템플릿 목록 보기
+              </button>
+
             </div>
           </div>
         </main>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

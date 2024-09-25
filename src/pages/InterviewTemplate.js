@@ -1,18 +1,31 @@
 import React, { useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
+import { useNavigate } from 'react-router-dom';
+import InterviewApiService from '../services/InterviewService';
 
 const InterviewTemplatePage = () => {
   const { darkMode, toggleDarkMode } = useTheme();
-  const [topic, setTopic] = useState('');
-  const [difficulty, setDifficulty] = useState('medium');
-  const [duration, setDuration] = useState(30);
+  const [theme, setTheme] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement template creation logic
-    console.log('Creating new template:', { topic, difficulty, duration });
+    setIsLoading(true);
+
+    try {
+      const result = await InterviewApiService.createTemplate(theme);
+
+      navigate('/interview/chat', { state: { templateId: result.interviewId, theme: result.theme } });
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+    }
+
   };
+
+
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -37,8 +50,8 @@ const InterviewTemplatePage = () => {
               id="topic"
               type="text"
               placeholder="예: 데이터베이스 트랜젝션"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
               required
             />
           </div>
@@ -48,7 +61,7 @@ const InterviewTemplatePage = () => {
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               type="submit"
             >
-              템플릿 생성
+              {isLoading ? '생성 중...' : '템플릿 생성'}
             </button>
           </div>
         </form>

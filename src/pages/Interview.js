@@ -1,35 +1,133 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, User, Bot, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
+import { useLocation } from 'react-router-dom';
+import InterviewApiService from "../services/InterviewService"
+
 
 const InterviewChatPage = () => {
   const { darkMode, toggleDarkMode } = useTheme();
-  const [messages, setMessages] = useState([
-    { type: 'ai', content: '안녕하세요! React 프론트엔드 개발자 면접을 시작하겠습니다. 준비되셨나요?' },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
   const messagesEndRef = useRef(null);
-  const [interviewTheme, setIterviewTheme] = useState("React");
+  const messagesContainerRef = useRef(null);
+  const [templateId, setTemplateId] = useState(null);
+  const [interviewTheme, setInterviewTheme] = useState("React");
+  const location = useLocation();
 
+  const loadMessages = useCallback(async () => {
+    if (!hasMore || isLoading) return;
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+    setIsLoading(true);
+    try {
+      const response = await InterviewApiService.getMessages(templateId, cursor);
+      setMessages(prevMessages => [...response.data, ...prevMessages]);
+      setCursor(response.cursor);
+      setHasMore(response.cursor !== null);
 
-  useEffect(scrollToBottom, [messages]);
+      // 메시지가 없고 cursor가 null이면 인터뷰 시작
+      if (response.data.length === 0 && response.cursor === null) {
+        await startInterview();
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      alert('메시지를 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [templateId, cursor, hasMore, isLoading]);
 
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (input.trim()) {
-      setMessages([...messages, { type: 'user', content: input }]);
-      setInput('');
-      // TODO: Implement AI response logic
-      setTimeout(() => {
-        setMessages(prev => [...prev, { type: 'ai', content: 'AI의 다음 질문이 여기에 표시됩니다.' }]);
-      }, 1000);
+  const startInterview = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await new Promise((resolve, reject) => {
+        InterviewApiService.startInterview(
+          templateId,
+          (data) => {
+            setMessages(prev => [...prev, { type: 'ai', content: data }]);
+          },
+          (error) => {
+            console.error('Error starting interview:', error);
+            reject(error);
+          },
+          resolve
+        );
+      });
+    } catch (error) {
+      console.error('Error in startInterview:', error);
+      alert('인터뷰 시작 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [templateId]);
+
+  useEffect(() => {
+    const fetchInterviewData = async () => {
+      if (!location.state || !location.state.templateId) {
+        return;
+      }
+
+      setTemplateId(location.state.templateId);
+      setInterviewTheme(location.state.theme);
+    };
+
+    fetchInterviewData();
+  }, [location]);
+
+  useEffect(() => {
+    if (templateId) {
+      loadMessages();
+    }
+  }, [templateId, loadMessages]);
+
+  const handleScroll = () => {
+    const { scrollTop } = messagesContainerRef.current;
+    if (scrollTop === 0 && hasMore) {
+      loadMessages();
     }
   };
 
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (input.trim() && !isLoading) {
+      setIsLoading(true);
+      const userMessage = { type: 'user', content: input };
+      setMessages(prev => [...prev, userMessage]);
+      setInput('');
+
+      let aiMessage = { type: 'ai', content: '' };
+      setMessages(prev => [...prev, aiMessage]);
+
+      const updateAiMessage = (content) => {
+        setMessages(prev => prev.map((msg, index) =>
+          index === prev.length - 1 ? { ...msg, content: msg.content + content } : msg
+        ));
+      };
+
+      try {
+        await InterviewApiService.sendAnswer(
+          templateId,
+          input,
+          (data) => updateAiMessage(data),
+          (error) => {
+            console.error('Error in sendAnswer:', error);
+            alert('답변 전송 중 오류가 발생했습니다.');
+          },
+          () => {
+            console.log('Answer sending completed');
+          }
+        );
+      } catch (error) {
+        console.error('Error in handleSend:', error);
+        alert('답변 전송 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow py-4 px-4">
@@ -44,8 +142,13 @@ const InterviewChatPage = () => {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div
+        className="flex-1 overflow-y-auto p-4"
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+      >
         <div className="max-w-4xl mx-auto space-y-4">
+          {isLoading && cursor && <div className="text-center">메시지를 불러오는 중...</div>}
           {messages.map((message, index) => (
             <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`flex items-start space-x-2 max-w-[70%] ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
@@ -70,10 +173,12 @@ const InterviewChatPage = () => {
             onChange={(e) => setInput(e.target.value)}
             placeholder="답변을 입력하세요..."
             className="flex-1 p-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            disabled={isLoading}
           />
           <button
             type="submit"
-            className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isLoading}
           >
             <Send size={24} />
           </button>
