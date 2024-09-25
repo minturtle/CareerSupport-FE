@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 
-const MainBanner = () => {
+const MainBanner = ({ nickname }) => {
     const asciiArt = `
  _____                                 _____                                    _   
 /  __ \\                               /  ___|                                  | |  
@@ -16,7 +16,23 @@ const MainBanner = () => {
     const fullText = [
         { content: 'render(', color: 'text-[#ce9178]' },
         { content: '\n  ', color: 'text-[#4ec9b0]' },
-        { content: '\n <SIGNALDeveloperMode', color: 'text-[#4ec9b0]' },
+        { content: '\n  <Welcome', color: 'text-[#4ec9b0]' },
+        { content: '>', color: 'text-[#4ec9b0]' },
+        { content: '\n    <', color: 'text-[#9cdcfe]' },
+        { content: 'Text', color: 'text-[#9cdcfe]' },
+        { content: '>', color: 'text-[#9cdcfe]' },
+        { content: '환영합니다, ', color: 'text-[#d4d4d4]' },
+        { content: nickname, color: 'text-[#d4d4d4]' },
+        { content: '님', color: 'text-[#d4d4d4]' },
+        { content: '!', color: 'text-[#d4d4d4]' },
+        { content: '</', color: 'text-[#9cdcfe]' },
+        { content: 'Text', color: 'text-[#9cdcfe]' },
+        { content: '>', color: 'text-[#9cdcfe]' },
+        { content: '\n  </', color: 'text-[#4ec9b0]' },
+        { content: 'Welcome', color: 'text-[#4ec9b0]' },
+        { content: '>', color: 'text-[#4ec9b0]' },
+
+        { content: '\n  <Introduce', color: 'text-[#4ec9b0]' },
         { content: '>', color: 'text-[#4ec9b0]' },
         { content: '\n    <', color: 'text-[#9cdcfe]' },
         { content: 'Text', color: 'text-[#9cdcfe]' },
@@ -30,7 +46,7 @@ const MainBanner = () => {
         { content: 'Text', color: 'text-[#9cdcfe]' },
         { content: '>', color: 'text-[#9cdcfe]' },
         { content: '\n  </', color: 'text-[#4ec9b0]' },
-        { content: 'SIGNALDeveloperMode', color: 'text-[#4ec9b0]' },
+        { content: 'Introduce', color: 'text-[#4ec9b0]' },
         { content: '>', color: 'text-[#4ec9b0]' },
         { content: '\n)', color: 'text-[#ce9178]' }
     ];

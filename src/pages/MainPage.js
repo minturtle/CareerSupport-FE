@@ -1,10 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PlusCircle, List, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import MainBanner from '../components/MainBanner';
+import UserApiService from '../services/UserAPIService';
+
 const MainPage = () => {
   const { darkMode, toggleDarkMode } = useTheme();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userInfo, setUserInfo] = useState({ nickname: "익명의 개발자" });
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const token = localStorage.getItem('accessToken');
+
+      if (!token) {
+        return;
+      }
+      UserApiService.setToken(token);
+      try {
+        const userData = await UserApiService.getUserInfo();
+        setIsLoggedIn(true);
+        setUserInfo(userData);
+      } catch (error) {
+        setError('토큰이 유효하지 않습니다.');
+        localStorage.removeItem('accessToken');
+      }
+
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggedIn(false);
+      setUserInfo(null);
+      localStorage.removeItem('accessToken');
+      navigate('/');
+    } catch (error) {
+      setError('로그아웃 중 오류가 발생했습니다.');
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 p-4 sm:p-8 transition-colors duration-200">
@@ -24,18 +63,27 @@ const MainPage = () => {
             >
               {darkMode ? <Sun size={24} /> : <Moon size={24} />}
             </button>
-            <Link to="/login">
-              <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 text-lg rounded-full transition duration-300 ease-in-out">
-                로그인
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 text-lg rounded-full transition duration-300 ease-in-out"
+              >
+                로그아웃
               </button>
-            </Link>
+            ) : (
+              <Link to="/login">
+                <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 text-lg rounded-full transition duration-300 ease-in-out">
+                  로그인
+                </button>
+              </Link>
+            )}
 
           </div>
         </header>
 
         <main>
           <section className="mb-12 sm:mb-16">
-            <MainBanner />
+            <MainBanner nickname={userInfo.nickname} />
           </section>
 
 
