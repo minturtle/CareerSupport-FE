@@ -65,5 +65,5 @@ jobs:
           username: ${{ secrets.GCE_USER }}
           host: ${{ secrets.GCE_HOST }}
           key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
-          source: "build/*"
-          target: "/home/ubuntu/static"
+          source: "build/*"  # build 디렉토리의 모든 파일
+          target: "/home/ubuntu/static"  # /home/ubuntu/static 경로로 전송
