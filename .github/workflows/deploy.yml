@@ -11,30 +11,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4. Build the React project
       - name: Build project
         run: npm run build
 
-      # 5. Upload the built project as a GitHub artifact
+      - name: Package Application
+        run: tar -czvf build.tar.gz -C build .
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
-          path: build
+          path: build.tar.gz
 
   deploy:
     name: Deploy to GCE via SSH
@@ -52,8 +50,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
 
-      - name: Package Application
-        run: tar -czvf build.tar.gz -C build .
 
       - name: Deploy to Google Compute Engine
         uses: appleboy/scp-action@master
