@@ -113,7 +113,27 @@ const InterviewApiService = {
             console.error('Error starting interview:', error);
             onError(error);
         }
-    }
+    },
+
+    async getTemplates(page = 0, size = 10) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/templates?page=${page}&size=${size}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': this.getAuthorizationHeader(),
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching templates:', error);
+            throw error;
+        }
+    },
 };
 
 export default InterviewApiService;

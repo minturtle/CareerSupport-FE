@@ -1,37 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
+import InterviewApiService from '../services/InterviewService';
+import { useNavigate } from 'react-router-dom';
 
 
 
 const InterviewTemplateListPage = () => {
   const { darkMode, toggleDarkMode } = useTheme();
-  const [currentPage, setCurrentPage] = useState(1);
-  const templatesPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(0);
+  const [templates, setTemplates] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const templatesPerPage = 10;
 
-  // 가상의 템플릿 데이터
-  const dummyTemplates = [
-    { id: 1, title: 'React 프론트엔드 개발자', createdAt: '2023-05-15' },
-    { id: 2, title: 'Node.js 백엔드 개발자', createdAt: '2023-05-14' },
-    { id: 3, title: 'Python 데이터 사이언티스트', createdAt: '2023-05-13' },
-    { id: 4, title: 'Java 안드로이드 개발자', createdAt: '2023-05-12' },
-    { id: 5, title: 'iOS 앱 개발자', createdAt: '2023-05-11' },
-    { id: 6, title: 'DevOps 엔지니어', createdAt: '2023-05-10' },
-    { id: 7, title: 'UI/UX 디자이너', createdAt: '2023-05-09' },
-    { id: 8, title: '클라우드 아키텍트', createdAt: '2023-05-08' },
-    // ... 더 많은 템플릿 데이터
-  ];
+  useEffect(() => {
+    fetchTemplates();
+  }, [currentPage]);
 
-  // 현재 페이지의 템플릿 계산
-  const indexOfLastTemplate = currentPage * templatesPerPage;
-  const indexOfFirstTemplate = indexOfLastTemplate - templatesPerPage;
-  const currentTemplates = dummyTemplates.slice(indexOfFirstTemplate, indexOfLastTemplate);
-
-  // 총 페이지 수 계산
-  const totalPages = Math.ceil(dummyTemplates.length / templatesPerPage);
+  const fetchTemplates = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await InterviewApiService.getTemplates(currentPage, templatesPerPage);
+      setTemplates(data);
+    } catch (err) {
+      setError('템플릿을 불러오는데 실패했습니다.');
+      console.error('Failed to fetch templates:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  };
+
+  const handleTemplateClick = (templateId, theme) => {
+    navigate('/interview/chat', { state: { templateId, theme } });
   };
 
   return (
@@ -46,34 +58,42 @@ const InterviewTemplateListPage = () => {
             {darkMode ? <Sun size={24} /> : <Moon size={24} />}
           </button>
         </div>
-        
-        <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-            {currentTemplates.map((template) => (
-              <li key={template.id}>
-                <a href={`/templates/${template.id}`} className="block hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <div className="px-4 py-4 sm:px-6">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400 truncate">
-                        {template.title}
-                      </p>
-                      <div className="ml-2 flex-shrink-0 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                        <Calendar className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400 dark:text-gray-500" aria-hidden="true" />
-                        <p>{template.createdAt}</p>
+
+        {isLoading && <p className="text-center">로딩 중...</p>}
+        {error && <p className="text-center text-red-500">{error}</p>}
+
+        {!isLoading && !error && (
+          <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              {templates.map((template) => (
+                <li key={template.id}>
+                  <div
+                    onClick={() => handleTemplateClick(template.id, template.theme)}
+                    className="block hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                  >
+                    <div className="px-4 py-4 sm:px-6">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400 truncate">
+                          {template.theme}
+                        </p>
+                        <div className="ml-2 flex-shrink-0 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                          <Calendar className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                          <p>{formatDate(template.createdAt)}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* 페이지네이션 */}
         <div className="flex justify-between items-center mt-6">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
+            disabled={currentPage === 0}
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="mr-2 h-5 w-5" aria-hidden="true" />
@@ -81,7 +101,7 @@ const InterviewTemplateListPage = () => {
           </button>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
-            disabled={indexOfLastTemplate >= dummyTemplates.length}
+            disabled={templates.length < templatesPerPage}
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             다음
