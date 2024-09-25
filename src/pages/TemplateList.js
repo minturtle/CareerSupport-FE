@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';

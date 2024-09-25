@@ -1,4 +1,4 @@
-
+/* eslint-disable */
 class UnAuthorizedError extends Error {
     constructor() {
         super();

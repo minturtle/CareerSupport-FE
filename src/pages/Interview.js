@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, User, Bot, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';

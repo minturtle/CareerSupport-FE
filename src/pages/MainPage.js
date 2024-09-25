@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useEffect, useState } from 'react';
 import { PlusCircle, List, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';

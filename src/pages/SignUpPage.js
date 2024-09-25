@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 import { Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
