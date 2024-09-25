@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8080/api/users';
 
 
 const UserApiService = {
@@ -14,7 +14,7 @@ const UserApiService = {
 
     async getUserInfo() {
         try {
-            const response = await axios.get(`${API_BASE_URL}/users/info`);
+            const response = await axios.get(`${API_BASE_URL}/info`);
             return response.data;
         } catch (error) {
             console.error('Error fetching user info:', error);
@@ -39,7 +39,17 @@ const UserApiService = {
             console.error('Logout error:', error);
             throw error;
         }
+    },
+    async register(userData) {
+        try {
+            const response = await axios.post(`${API_BASE_URL}/register`, userData);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     }
+
+
 };
 
 export default UserApiService;

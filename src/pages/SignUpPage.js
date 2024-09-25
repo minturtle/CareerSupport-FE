@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
+import { useNavigate } from 'react-router-dom';
+import UserApiService from '../services/UserAPIService';
 
 const SignUpPage = () => {
   const [username, setUsername] = useState('');
@@ -8,11 +10,24 @@ const SignUpPage = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { darkMode, toggleDarkMode } = useTheme();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement sign up logic
-    console.log('Sign up attempt', { username, nickname, password });
+
+    try {
+      await UserApiService.register({ username, nickname, password });
+      alert('회원가입이 성공적으로 완료되었습니다. 로그인 페이지로 이동합니다.');
+      navigate('/login'); // 로그인 페이지로 리다이렉트
+    } catch (error) {
+      console.log(error)
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        alert('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      }
+    }
   };
 
   return (
@@ -27,10 +42,10 @@ const SignUpPage = () => {
           </button>
         </div>
         <div>
-          <img 
+          <img
             className="mx-auto h-12 w-auto"
             src={darkMode ? "images/logo-dark.png" : "images/logo-light.png"}
-            alt="CareerSupport Logo" 
+            alt="CareerSupport Logo"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             회원가입

@@ -9,13 +9,14 @@ const MainPage = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState({ nickname: "익명의 개발자" });
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   useEffect(() => {
     const checkLoginStatus = async () => {
       const token = localStorage.getItem('accessToken');
 
       if (!token) {
+        setIsLoading(false);
         return;
       }
       UserApiService.setToken(token);
@@ -24,8 +25,9 @@ const MainPage = () => {
         setIsLoggedIn(true);
         setUserInfo(userData);
       } catch (error) {
-        setError('토큰이 유효하지 않습니다.');
         localStorage.removeItem('accessToken');
+      } finally {
+        setIsLoading(false);
       }
 
     };
@@ -36,14 +38,18 @@ const MainPage = () => {
   const handleLogout = async () => {
     try {
       setIsLoggedIn(false);
-      setUserInfo(null);
+      setUserInfo({ nickname: "익명의 개발자" });
       localStorage.removeItem('accessToken');
       navigate('/');
     } catch (error) {
-      setError('로그아웃 중 오류가 발생했습니다.');
     }
   };
 
+  if (isLoading) {
+    return <div className="min-h-screen bg-white dark:bg-gray-900 p-4 sm:p-8 transition-colors duration-200">
+
+    </div>
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 p-4 sm:p-8 transition-colors duration-200">

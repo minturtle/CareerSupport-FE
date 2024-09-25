@@ -1,19 +1,36 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff,  Sun, Moon } from 'lucide-react';
+import { Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../utils/ThemeProvider';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
+import UserApiService from '../services/UserAPIService';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { darkMode, toggleDarkMode } = useTheme();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement login logic
-    console.log('Login attempt', { username, password });
+
+    try {
+      const response = await UserApiService.login({ username, password });
+
+      // 로그인 성공 처리
+      if (response.token && response.nickname) {
+        localStorage.setItem('accessToken', response.token);
+        localStorage.setItem('userNickname', response.nickname);
+        UserApiService.setToken(response.token);
+        navigate('/'); // 메인 페이지로 리다이렉트
+      } else {
+        throw new Error();
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('로그인에 실패했습니다. 사용자 이름과 비밀번호를 확인해주세요.');
+    }
   };
 
   return (
@@ -28,10 +45,10 @@ const LoginPage = () => {
           </button>
         </div>
         <div>
-          <img 
+          <img
             className="mx-auto h-12 w-auto"
             src={darkMode ? "images/logo-dark.png" : "images/logo-light.png"}
-            alt="CareerSupport Logo" 
+            alt="CareerSupport Logo"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             로그인
@@ -87,7 +104,7 @@ const LoginPage = () => {
         </form>
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           계정이 없으신가요?{' '}
-          <Link to = "/signup" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+          <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
             회원가입
           </Link>
         </p>
