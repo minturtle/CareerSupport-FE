@@ -1,4 +1,4 @@
-name: Build and Deploy React to GCP Firebase
+name: Build and Deploy React to GCP Compute Engine
 
 on:
   push:
@@ -35,7 +35,8 @@ jobs:
         with:
           name: build-artifacts
           path: build
-   deploy:
+
+  deploy:
     name: Deploy to GCE via SSH
     runs-on: ubuntu-latest
     needs: build
@@ -51,15 +52,16 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.GCE_SSH_PRIVATE_KEY }}
 
-      # 3. Deploy to Google Compute Engine
+      # 3. Remove existing files and deploy to Google Compute Engine
       - name: Deploy to Google Compute Engine
         env:
           GCE_USER: ${{ secrets.GCE_USER }}
           GCE_HOST: ${{ secrets.GCE_HOST }}
         run: |
+          # Remove existing files on the GCE instance
           ssh -o StrictHostKeyChecking=no $GCE_USER@$GCE_HOST << 'EOF'
             sudo rm -rf /home/ubuntu/static/*
-            
-            sudo scp -r /home/ubuntu/build/* /home/ubuntu/static/
- 
           EOF
+
+          # Copy new build files to the GCE instance
+          scp -o StrictHostKeyChecking=no -r build/* $GCE_USER@$GCE_HOST:/home/ubuntu/static/
