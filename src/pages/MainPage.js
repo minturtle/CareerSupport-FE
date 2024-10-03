@@ -27,6 +27,7 @@ const MainPage = () => {
         setIsLoggedIn(true);
         setUserInfo(userData);
       } catch (error) {
+        setIsLoggedIn(false);
         localStorage.removeItem('accessToken');
       } finally {
         setIsLoading(false);
